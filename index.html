@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#9CC6DB">
+    <meta name="description" content="Operation Hoverboard - Tracking Flying Machine Development">
+    <title>Operation Hoverboard</title>
+    <link rel="manifest" href="hoverboard-manifest.json">
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛹</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="hoverboard-styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-icon">🛹</div>
+            <h2>Operation Hoverboard</h2>
+            <div class="loading-text">Initializing Systems...</div>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app" class="app-container" style="display: none;">
+        
+        <!-- Particle Background -->
+        <canvas id="particleCanvas" class="particle-canvas"></canvas>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-glow"></div>
+            <div class="header-content">
+                <div class="logo-container">
+                    <div class="logo-icon">🛹</div>
+                    <div class="logo-text">
+                        <h1 class="app-title">Operation Hoverboard</h1>
+                        <p class="app-subtitle">Flying Machine Development Program</p>
+                    </div>
+                </div>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Active</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <!-- Progress Section -->
+            <section class="progress-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="title-icon">📊</span>
+                        Development Progress
+                    </h2>
+                    <div class="section-line"></div>
+                </div>
+
+                <!-- Main Progress Circle -->
+                <div class="progress-container">
+                    <div class="progress-ring">
+                        <svg class="progress-svg" width="280" height="280">
+                            <defs>
+                                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#9CC6DB;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#6BA5C1;stop-opacity:1" />
+                                </linearGradient>
+                                <filter id="glow">
+                                    <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                                    <feMerge>
+                                        <feMergeNode in="coloredBlur"/>
+                                        <feMergeNode in="SourceGraphic"/>
+                                    </feMerge>
+                                </filter>
+                            </defs>
+                            <!-- Background Circle -->
+                            <circle class="progress-bg" cx="140" cy="140" r="120" 
+                                    stroke="#2C3E50" stroke-width="8" fill="none" opacity="0.2"/>
+                            <!-- Progress Circle -->
+                            <circle id="progressCircle" class="progress-circle" cx="140" cy="140" r="120" 
+                                    stroke="url(#progressGradient)" stroke-width="12" fill="none" 
+                                    stroke-linecap="round" filter="url(#glow)"
+                                    transform="rotate(-90 140 140)"/>
+                        </svg>
+                        
+                        <div class="progress-info">
+                            <div class="progress-percentage" id="progressPercentage">67%</div>
+                            <div class="progress-label">Complete</div>
+                            <div class="progress-status">In Development</div>
+                        </div>
+                    </div>
+
+                    <!-- Holographic Effects -->
+                    <div class="holo-ring holo-ring-1"></div>
+                    <div class="holo-ring holo-ring-2"></div>
+                    <div class="holo-ring holo-ring-3"></div>
+                </div>
+
+                <!-- Progress Stats -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">⚙️</div>
+                        <div class="stat-value" id="componentsComplete">12/18</div>
+                        <div class="stat-label">Components</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔬</div>
+                        <div class="stat-value" id="testsCompleted">45</div>
+                        <div class="stat-label">Tests Run</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚡</div>
+                        <div class="stat-value" id="powerLevel">87%</div>
+                        <div class="stat-label">Power Level</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-value" id="daysRemaining">42</div>
+                        <div class="stat-label">Days Left</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hoverboard Model Section -->
+            <section class="model-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="title-icon">🛹</span>
+                        Hoverboard Model
+                    </h2>
+                    <div class="section-line"></div>
+                </div>
+
+                <!-- 3D Model Container -->
+                <div class="model-container">
+                    <div class="model-frame">
+                        <div class="model-content">
+                            <img id="hoverboardImage" 
+                                 src="https://images.unsplash.com/photo-1580894894513-541e068a3e2b?w=800&q=80" 
+                                 alt="Hoverboard Model" 
+                                 class="hoverboard-image"
+                                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 800 600%22><rect fill=%22%239CC6DB%22 width=%22800%22 height=%22600%22/><text x=%2250%%22 y=%2250%%22 font-size=%2260%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22>🛹 Hoverboard</text></svg>'">
+                            
+                            <!-- Scan Lines Effect -->
+                            <div class="scan-lines"></div>
+                            
+                            <!-- Corner Brackets -->
+                            <div class="corner-bracket corner-tl"></div>
+                            <div class="corner-bracket corner-tr"></div>
+                            <div class="corner-bracket corner-bl"></div>
+                            <div class="corner-bracket corner-br"></div>
+                            
+                            <!-- Targeting Grid -->
+                            <div class="target-grid"></div>
+                        </div>
+                        
+                        <!-- Model Info Overlay -->
+                        <div class="model-info">
+                            <div class="info-item">
+                                <span class="info-label">Model:</span>
+                                <span class="info-value">HB-X1 Prototype</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Status:</span>
+                                <span class="info-value status-active">Active Development</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Version:</span>
+                                <span class="info-value">v2.3.7</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Model Stats -->
+                    <div class="model-stats">
+                        <div class="model-stat">
+                            <div class="stat-bar">
+                                <div class="stat-bar-fill" style="width: 85%"></div>
+                            </div>
+                            <div class="stat-text">
+                                <span>Propulsion System</span>
+                                <span>85%</span>
+                            </div>
+                        </div>
+                        <div class="model-stat">
+                            <div class="stat-bar">
+                                <div class="stat-bar-fill" style="width: 70%"></div>
+                            </div>
+                            <div class="stat-text">
+                                <span>Stabilization</span>
+                                <span>70%</span>
+                            </div>
+                        </div>
+                        <div class="model-stat">
+                            <div class="stat-bar">
+                                <div class="stat-bar-fill" style="width: 92%"></div>
+                            </div>
+                            <div class="stat-text">
+                                <span>Navigation</span>
+                                <span>92%</span>
+                            </div>
+                        </div>
+                        <div class="model-stat">
+                            <div class="stat-bar">
+                                <div class="stat-bar-fill" style="width: 60%"></div>
+                            </div>
+                            <div class="stat-text">
+                                <span>Safety Systems</span>
+                                <span>60%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Specifications Grid -->
+                <div class="specs-grid">
+                    <div class="spec-card">
+                        <div class="spec-icon">⚡</div>
+                        <div class="spec-title">Max Speed</div>
+                        <div class="spec-value">45 km/h</div>
+                    </div>
+                    <div class="spec-card">
+                        <div class="spec-icon">🔋</div>
+                        <div class="spec-title">Battery Life</div>
+                        <div class="spec-value">2.5 hours</div>
+                    </div>
+                    <div class="spec-card">
+                        <div class="spec-icon">📏</div>
+                        <div class="spec-title">Hover Height</div>
+                        <div class="spec-value">30 cm</div>
+                    </div>
+                    <div class="spec-card">
+                        <div class="spec-icon">⚖️</div>
+                        <div class="spec-title">Weight</div>
+                        <div class="spec-value">8.5 kg</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Timeline Section -->
+            <section class="timeline-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="title-icon">📅</span>
+                        Development Timeline
+                    </h2>
+                    <div class="section-line"></div>
+                </div>
+
+                <div class="timeline">
+                    <div class="timeline-item completed">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">Phase 1: Research & Design</div>
+                            <div class="timeline-date">Jan 2024 - Mar 2024</div>
+                            <div class="timeline-status">✓ Completed</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item completed">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">Phase 2: Prototype Development</div>
+                            <div class="timeline-date">Apr 2024 - Jun 2024</div>
+                            <div class="timeline-status">✓ Completed</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item active">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">Phase 3: Testing & Refinement</div>
+                            <div class="timeline-date">Jul 2024 - Sep 2024</div>
+                            <div class="timeline-status">⚡ In Progress</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">Phase 4: Final Production</div>
+                            <div class="timeline-date">Oct 2024 - Dec 2024</div>
+                            <div class="timeline-status">⏳ Upcoming</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Updates Section -->
+            <section class="updates-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="title-icon">📰</span>
+                        Latest Updates
+                    </h2>
+                    <div class="section-line"></div>
+                </div>
+
+                <div class="updates-container" id="updatesContainer">
+                    <!-- Updates will be dynamically loaded -->
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-text">
+                    <p>© 2024 Operation Hoverboard</p>
+                    <p class="footer-subtext">Confidential Development Project</p>
+                </div>
+                <div class="footer-badge">
+                    <span class="badge-icon">🔒</span>
+                    <span>Secure Connection</span>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script src="hoverboard-app.js"></script>
+</body>
+</html>

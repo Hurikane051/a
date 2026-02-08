@@ -4,326 +4,1030 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#9CC6DB">
-    <meta name="description" content="Operation Hoverboard - Tracking Flying Machine Development">
+    <meta name="description" content="Operation Hoverboard - Tracking Progress Mesin Terbang Futuristik">
     <title>Operation Hoverboard</title>
     <link rel="manifest" href="hoverboard-manifest.json">
     <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛹</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="hoverboard-styles.css">
+    <style>
+        /* ==================== RESET & BASE ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #9CC6DB;
+            --primary-dark: #7BA8C0;
+            --primary-light: #C5E0EC;
+            --accent-cyan: #00F0FF;
+            --accent-purple: #B466FF;
+            --accent-orange: #FF6B35;
+            --dark-bg: #0A0E27;
+            --darker-bg: #050814;
+            --card-bg: rgba(156, 198, 219, 0.08);
+            --glow-blue: rgba(0, 240, 255, 0.5);
+            --text-primary: #FFFFFF;
+            --text-secondary: #9CC6DB;
+            --text-muted: #6B8299;
+        }
+
+        body {
+            font-family: 'Playfair Display', serif;
+            font-weight: 500;
+            background: var(--darker-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0A0E27 0%, #1a1f3a 50%, #0A0E27 100%);
+            z-index: -2;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(156, 198, 219, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(156, 198, 219, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 15s infinite ease-in-out;
+            box-shadow: 0 0 10px var(--glow-blue);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+            50% { transform: translate(30px, -100vh) scale(0.5); opacity: 0; }
+        }
+
+        /* ==================== LOADING SCREEN ==================== */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, var(--darker-bg), var(--dark-bg));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            animation: hoverFloat 2s infinite ease-in-out;
+            filter: drop-shadow(0 0 20px var(--glow-blue));
+        }
+
+        @keyframes hoverFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .loading-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .loading-bar {
+            width: 250px;
+            height: 4px;
+            background: rgba(156, 198, 219, 0.2);
+            margin: 1rem auto;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--primary-color));
+            animation: loadingProgress 1.5s ease-in-out infinite;
+            box-shadow: 0 0 10px var(--glow-blue);
+        }
+
+        @keyframes loadingProgress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        /* ==================== MAIN CONTAINER ==================== */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        /* ==================== HEADER ==================== */
+        .header {
+            text-align: center;
+            padding: 3rem 1rem 2rem;
+            position: relative;
+        }
+
+        .project-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--primary-color);
+            border-radius: 30px;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.2); }
+            50% { box-shadow: 0 0 30px rgba(0, 240, 255, 0.4); }
+        }
+
+        .app-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-primary), var(--primary-color), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(156, 198, 219, 0.3);
+            line-height: 1.2;
+        }
+
+        .app-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-bottom: 1rem;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid #4CAF50;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #4CAF50;
+            margin-top: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #4CAF50;
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ==================== PROGRESS SECTION ==================== */
+        .progress-section {
+            margin: 3rem 0;
+            text-align: center;
+        }
+
+        .progress-title {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .progress-circle-container {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            margin: 0 auto 3rem;
+        }
+
+        .progress-circle {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress-circle-bg {
+            fill: none;
+            stroke: rgba(156, 198, 219, 0.1);
+            stroke-width: 15;
+        }
+
+        .progress-circle-bar {
+            fill: none;
+            stroke: url(#progressGradient);
+            stroke-width: 15;
+            stroke-linecap: round;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: progressFill 2s ease-out forwards;
+            filter: drop-shadow(0 0 10px var(--glow-blue));
+        }
+
+        @keyframes progressFill {
+            to {
+                stroke-dashoffset: 330; /* 67% of 1000 */
+            }
+        }
+
+        .progress-circle-glow {
+            fill: none;
+            stroke: var(--accent-cyan);
+            stroke-width: 20;
+            opacity: 0.2;
+            filter: blur(10px);
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: progressFill 2s ease-out forwards;
+        }
+
+        .progress-text-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .progress-percentage {
+            font-size: 5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+            animation: countUp 2s ease-out;
+        }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .progress-label {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* ==================== STATS CARDS ==================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(156, 198, 219, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+        }
+
+        .stat-card:hover::before {
+            animation: shine 1.5s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
+            border-color: var(--accent-cyan);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 10px var(--glow-blue));
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ==================== HOVERBOARD MODEL ==================== */
+        .model-section {
+            margin: 4rem 0;
+            position: relative;
+        }
+
+        .model-title {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .model-container {
+            position: relative;
+            background: var(--card-bg);
+            border: 2px solid var(--primary-color);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 50px rgba(0, 240, 255, 0.2);
+        }
+
+        .model-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--accent-cyan), var(--primary-color), var(--accent-purple), var(--accent-cyan));
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background-size: 300% 300%;
+            animation: gradientMove 5s ease infinite;
+        }
+
+        @keyframes gradientMove {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .model-container:hover::before {
+            opacity: 0.5;
+        }
+
+        .hoverboard-display {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            animation: hover3D 4s ease-in-out infinite;
+        }
+
+        @keyframes hover3D {
+            0%, 100% { transform: perspective(1000px) rotateX(5deg) rotateY(-5deg) translateY(0); }
+            50% { transform: perspective(1000px) rotateX(-5deg) rotateY(5deg) translateY(-20px); }
+        }
+
+        .hoverboard-image {
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+            filter: drop-shadow(0 20px 50px rgba(0, 240, 255, 0.4));
+        }
+
+        .model-specs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .spec-item {
+            background: rgba(10, 14, 39, 0.5);
+            border: 1px solid rgba(156, 198, 219, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spec-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--primary-color));
+            box-shadow: 0 0 10px var(--glow-blue);
+        }
+
+        .spec-name {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .spec-value {
+            font-size: 1.3rem;
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        /* ==================== TIMELINE ==================== */
+        .timeline-section {
+            margin: 4rem 0;
+            padding: 2rem;
+        }
+
+        .timeline-title {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--primary-color), var(--accent-cyan));
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px var(--glow-blue);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .timeline-item:nth-child(odd) {
+            flex-direction: row;
+        }
+
+        .timeline-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            width: 45%;
+            background: var(--card-bg);
+            border: 1px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 1.5rem;
+            position: relative;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-content:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--accent-cyan);
+            border: 3px solid var(--darker-bg);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--glow-blue);
+            animation: dotPulse 2s infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { box-shadow: 0 0 20px var(--glow-blue); }
+            50% { box-shadow: 0 0 40px var(--accent-cyan); }
+        }
+
+        .timeline-date {
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .timeline-title-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-description {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .timeline-status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            color: #4CAF50;
+            margin-top: 0.5rem;
+        }
+
+        .timeline-status.pending {
+            background: rgba(255, 152, 0, 0.2);
+            border-color: #FF9800;
+            color: #FF9800;
+        }
+
+        /* ==================== FOOTER ==================== */
+        .footer {
+            text-align: center;
+            padding: 3rem 1rem;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(156, 198, 219, 0.2);
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--primary-color);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 768px) {
+            .app-title {
+                font-size: 2.5rem;
+            }
+
+            .progress-circle-container {
+                width: 280px;
+                height: 280px;
+            }
+
+            .progress-percentage {
+                font-size: 4rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .model-specs {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+
+            .timeline-content {
+                width: 100%;
+                margin-left: 40px;
+            }
+
+            .timeline-dot {
+                left: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-title {
+                font-size: 2rem;
+            }
+
+            .progress-circle-container {
+                width: 240px;
+                height: 240px;
+            }
+
+            .progress-percentage {
+                font-size: 3rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ==================== ANIMATIONS ==================== */
+        .fade-in {
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-in-left {
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide-in-right {
+            animation: slideInRight 0.8s ease-out;
+            }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+    <div class="bg-grid"></div>
+    <div class="floating-particles" id="particles"></div>
+
     <!-- Loading Screen -->
     <div id="loadingScreen" class="loading-screen">
         <div class="loading-content">
             <div class="loading-icon">🛹</div>
             <h2>Operation Hoverboard</h2>
-            <div class="loading-text">Initializing Systems...</div>
             <div class="loading-bar">
                 <div class="loading-progress"></div>
             </div>
+            <p style="color: var(--text-secondary); margin-top: 1rem;">Initializing Systems...</p>
         </div>
     </div>
 
     <!-- Main App Container -->
     <div id="app" class="app-container" style="display: none;">
         
-        <!-- Particle Background -->
-        <canvas id="particleCanvas" class="particle-canvas"></canvas>
-
         <!-- Header -->
-        <header class="header">
-            <div class="header-glow"></div>
-            <div class="header-content">
-                <div class="logo-container">
-                    <div class="logo-icon">🛹</div>
-                    <div class="logo-text">
-                        <h1 class="app-title">Operation Hoverboard</h1>
-                        <p class="app-subtitle">Flying Machine Development Program</p>
-                    </div>
-                </div>
-                <div class="status-indicator">
-                    <span class="status-dot"></span>
-                    <span class="status-text">Active</span>
-                </div>
+        <header class="header fade-in">
+            <div class="project-badge">⚡ TOP SECRET PROJECT ⚡</div>
+            <h1 class="app-title">Operation Hoverboard</h1>
+            <p class="app-subtitle">Advanced Flying Machine Development</p>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span>System Active</span>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            
-            <!-- Progress Section -->
-            <section class="progress-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span class="title-icon">📊</span>
-                        Development Progress
-                    </h2>
-                    <div class="section-line"></div>
+        <!-- Progress Section -->
+        <section class="progress-section fade-in">
+            <h2 class="progress-title">Development Progress</h2>
+            <div class="progress-circle-container">
+                <svg class="progress-circle" viewBox="0 0 350 350">
+                    <defs>
+                        <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#00F0FF;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#9CC6DB;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#B466FF;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <circle class="progress-circle-glow" cx="175" cy="175" r="160"></circle>
+                    <circle class="progress-circle-bg" cx="175" cy="175" r="160"></circle>
+                    <circle class="progress-circle-bar" cx="175" cy="175" r="160"></circle>
+                </svg>
+                <div class="progress-text-container">
+                    <div class="progress-percentage" id="progressValue">67%</div>
+                    <div class="progress-label">Complete</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Grid -->
+        <section class="stats-grid fade-in">
+            <div class="stat-card slide-in-left">
+                <div class="stat-icon">⚙️</div>
+                <div class="stat-value">23</div>
+                <div class="stat-label">Components</div>
+            </div>
+            <div class="stat-card slide-in-left" style="animation-delay: 0.1s;">
+                <div class="stat-icon">🔬</div>
+                <div class="stat-value">156</div>
+                <div class="stat-label">Tests Run</div>
+            </div>
+            <div class="stat-card slide-in-right" style="animation-delay: 0.2s;">
+                <div class="stat-icon">⚡</div>
+                <div class="stat-value">98.5%</div>
+                <div class="stat-label">Efficiency</div>
+            </div>
+            <div class="stat-card slide-in-right" style="animation-delay: 0.3s;">
+                <div class="stat-icon">🚀</div>
+                <div class="stat-value">47</div>
+                <div class="stat-label">Days Active</div>
+            </div>
+        </section>
+
+        <!-- Hoverboard Model -->
+        <section class="model-section fade-in">
+            <h2 class="model-title">🛹 Hoverboard Model X-Alpha</h2>
+            <div class="model-container">
+                <div class="hoverboard-display">
+                    <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80" 
+                         alt="Futuristic Hoverboard" 
+                         class="hoverboard-image"
+                         onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 800 600%22><rect fill=%22%230A0E27%22 width=%22800%22 height=%22600%22/><text x=%2250%%22 y=%2250%%22 font-size=%2264%22 fill=%22%239CC6DB%22 text-anchor=%22middle%22 dy=%22.3em%22>🛹 HOVERBOARD</text></svg>'">
                 </div>
 
-                <!-- Main Progress Circle -->
-                <div class="progress-container">
-                    <div class="progress-ring">
-                        <svg class="progress-svg" width="280" height="280">
-                            <defs>
-                                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#9CC6DB;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#6BA5C1;stop-opacity:1" />
-                                </linearGradient>
-                                <filter id="glow">
-                                    <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-                                    <feMerge>
-                                        <feMergeNode in="coloredBlur"/>
-                                        <feMergeNode in="SourceGraphic"/>
-                                    </feMerge>
-                                </filter>
-                            </defs>
-                            <!-- Background Circle -->
-                            <circle class="progress-bg" cx="140" cy="140" r="120" 
-                                    stroke="#2C3E50" stroke-width="8" fill="none" opacity="0.2"/>
-                            <!-- Progress Circle -->
-                            <circle id="progressCircle" class="progress-circle" cx="140" cy="140" r="120" 
-                                    stroke="url(#progressGradient)" stroke-width="12" fill="none" 
-                                    stroke-linecap="round" filter="url(#glow)"
-                                    transform="rotate(-90 140 140)"/>
-                        </svg>
-                        
-                        <div class="progress-info">
-                            <div class="progress-percentage" id="progressPercentage">67%</div>
-                            <div class="progress-label">Complete</div>
-                            <div class="progress-status">In Development</div>
-                        </div>
+                <div class="model-specs">
+                    <div class="spec-item">
+                        <div class="spec-name">Max Speed</div>
+                        <div class="spec-value">120 km/h</div>
                     </div>
-
-                    <!-- Holographic Effects -->
-                    <div class="holo-ring holo-ring-1"></div>
-                    <div class="holo-ring holo-ring-2"></div>
-                    <div class="holo-ring holo-ring-3"></div>
-                </div>
-
-                <!-- Progress Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">⚙️</div>
-                        <div class="stat-value" id="componentsComplete">12/18</div>
-                        <div class="stat-label">Components</div>
+                    <div class="spec-item">
+                        <div class="spec-name">Flight Height</div>
+                        <div class="spec-value">3.5 meters</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🔬</div>
-                        <div class="stat-value" id="testsCompleted">45</div>
-                        <div class="stat-label">Tests Run</div>
+                    <div class="spec-item">
+                        <div class="spec-name">Battery Life</div>
+                        <div class="spec-value">45 minutes</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">⚡</div>
-                        <div class="stat-value" id="powerLevel">87%</div>
-                        <div class="stat-label">Power Level</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🎯</div>
-                        <div class="stat-value" id="daysRemaining">42</div>
-                        <div class="stat-label">Days Left</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Hoverboard Model Section -->
-            <section class="model-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span class="title-icon">🛹</span>
-                        Hoverboard Model
-                    </h2>
-                    <div class="section-line"></div>
-                </div>
-
-                <!-- 3D Model Container -->
-                <div class="model-container">
-                    <div class="model-frame">
-                        <div class="model-content">
-                            <img id="hoverboardImage" 
-                                 src="https://images.unsplash.com/photo-1580894894513-541e068a3e2b?w=800&q=80" 
-                                 alt="Hoverboard Model" 
-                                 class="hoverboard-image"
-                                 onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 800 600%22><rect fill=%22%239CC6DB%22 width=%22800%22 height=%22600%22/><text x=%2250%%22 y=%2250%%22 font-size=%2260%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22>🛹 Hoverboard</text></svg>'">
-                            
-                            <!-- Scan Lines Effect -->
-                            <div class="scan-lines"></div>
-                            
-                            <!-- Corner Brackets -->
-                            <div class="corner-bracket corner-tl"></div>
-                            <div class="corner-bracket corner-tr"></div>
-                            <div class="corner-bracket corner-bl"></div>
-                            <div class="corner-bracket corner-br"></div>
-                            
-                            <!-- Targeting Grid -->
-                            <div class="target-grid"></div>
-                        </div>
-                        
-                        <!-- Model Info Overlay -->
-                        <div class="model-info">
-                            <div class="info-item">
-                                <span class="info-label">Model:</span>
-                                <span class="info-value">HB-X1 Prototype</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Status:</span>
-                                <span class="info-value status-active">Active Development</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Version:</span>
-                                <span class="info-value">v2.3.7</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Model Stats -->
-                    <div class="model-stats">
-                        <div class="model-stat">
-                            <div class="stat-bar">
-                                <div class="stat-bar-fill" style="width: 85%"></div>
-                            </div>
-                            <div class="stat-text">
-                                <span>Propulsion System</span>
-                                <span>85%</span>
-                            </div>
-                        </div>
-                        <div class="model-stat">
-                            <div class="stat-bar">
-                                <div class="stat-bar-fill" style="width: 70%"></div>
-                            </div>
-                            <div class="stat-text">
-                                <span>Stabilization</span>
-                                <span>70%</span>
-                            </div>
-                        </div>
-                        <div class="model-stat">
-                            <div class="stat-bar">
-                                <div class="stat-bar-fill" style="width: 92%"></div>
-                            </div>
-                            <div class="stat-text">
-                                <span>Navigation</span>
-                                <span>92%</span>
-                            </div>
-                        </div>
-                        <div class="model-stat">
-                            <div class="stat-bar">
-                                <div class="stat-bar-fill" style="width: 60%"></div>
-                            </div>
-                            <div class="stat-text">
-                                <span>Safety Systems</span>
-                                <span>60%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Specifications Grid -->
-                <div class="specs-grid">
-                    <div class="spec-card">
-                        <div class="spec-icon">⚡</div>
-                        <div class="spec-title">Max Speed</div>
-                        <div class="spec-value">45 km/h</div>
-                    </div>
-                    <div class="spec-card">
-                        <div class="spec-icon">🔋</div>
-                        <div class="spec-title">Battery Life</div>
-                        <div class="spec-value">2.5 hours</div>
-                    </div>
-                    <div class="spec-card">
-                        <div class="spec-icon">📏</div>
-                        <div class="spec-title">Hover Height</div>
-                        <div class="spec-value">30 cm</div>
-                    </div>
-                    <div class="spec-card">
-                        <div class="spec-icon">⚖️</div>
-                        <div class="spec-title">Weight</div>
+                    <div class="spec-item">
+                        <div class="spec-name">Weight</div>
                         <div class="spec-value">8.5 kg</div>
                     </div>
-                </div>
-            </section>
-
-            <!-- Timeline Section -->
-            <section class="timeline-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span class="title-icon">📅</span>
-                        Development Timeline
-                    </h2>
-                    <div class="section-line"></div>
-                </div>
-
-                <div class="timeline">
-                    <div class="timeline-item completed">
-                        <div class="timeline-marker"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-title">Phase 1: Research & Design</div>
-                            <div class="timeline-date">Jan 2024 - Mar 2024</div>
-                            <div class="timeline-status">✓ Completed</div>
-                        </div>
+                    <div class="spec-item">
+                        <div class="spec-name">Propulsion</div>
+                        <div class="spec-value">Anti-Gravity</div>
                     </div>
-                    <div class="timeline-item completed">
-                        <div class="timeline-marker"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-title">Phase 2: Prototype Development</div>
-                            <div class="timeline-date">Apr 2024 - Jun 2024</div>
-                            <div class="timeline-status">✓ Completed</div>
-                        </div>
-                    </div>
-                    <div class="timeline-item active">
-                        <div class="timeline-marker"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-title">Phase 3: Testing & Refinement</div>
-                            <div class="timeline-date">Jul 2024 - Sep 2024</div>
-                            <div class="timeline-status">⚡ In Progress</div>
-                        </div>
-                    </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-title">Phase 4: Final Production</div>
-                            <div class="timeline-date">Oct 2024 - Dec 2024</div>
-                            <div class="timeline-status">⏳ Upcoming</div>
-                        </div>
+                    <div class="spec-item">
+                        <div class="spec-name">Material</div>
+                        <div class="spec-value">Carbon Fiber</div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Updates Section -->
-            <section class="updates-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span class="title-icon">📰</span>
-                        Latest Updates
-                    </h2>
-                    <div class="section-line"></div>
+        <!-- Timeline -->
+        <section class="timeline-section fade-in">
+            <h2 class="timeline-title">Development Timeline</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">Phase 1 - Completed</div>
+                        <div class="timeline-title-text">Initial Design & Concept</div>
+                        <div class="timeline-description">Blueprint creation and theoretical calculations for anti-gravity propulsion system</div>
+                        <span class="timeline-status">✓ Complete</span>
+                    </div>
+                    <div class="timeline-dot"></div>
                 </div>
 
-                <div class="updates-container" id="updatesContainer">
-                    <!-- Updates will be dynamically loaded -->
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">Phase 2 - Completed</div>
+                        <div class="timeline-title-text">Prototype Development</div>
+                        <div class="timeline-description">Built first working prototype with basic hovering capabilities</div>
+                        <span class="timeline-status">✓ Complete</span>
+                    </div>
+                    <div class="timeline-dot"></div>
                 </div>
-            </section>
 
-        </main>
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">Phase 3 - In Progress</div>
+                        <div class="timeline-title-text">Testing & Optimization</div>
+                        <div class="timeline-description">Current phase: Running stability tests and improving flight control systems</div>
+                        <span class="timeline-status pending">⏳ 67% Complete</span>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">Phase 4 - Upcoming</div>
+                        <div class="timeline-title-text">Final Assembly</div>
+                        <div class="timeline-description">Integration of all systems and aesthetic finishing touches</div>
+                        <span class="timeline-status pending">⏳ Pending</span>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-content">
+                        <div class="timeline-date">Phase 5 - Upcoming</div>
+                        <div class="timeline-title-text">Launch & Demo</div>
+                        <div class="timeline-description">Public demonstration and operational testing</div>
+                        <span class="timeline-status pending">⏳ Pending</span>
+                    </div>
+                    <div class="timeline-dot"></div>
+                </div>
+            </div>
+        </section>
 
         <!-- Footer -->
         <footer class="footer">
-            <div class="footer-content">
-                <div class="footer-text">
-                    <p>© 2024 Operation Hoverboard</p>
-                    <p class="footer-subtext">Confidential Development Project</p>
-                </div>
-                <div class="footer-badge">
-                    <span class="badge-icon">🔒</span>
-                    <span>Secure Connection</span>
-                </div>
-            </div>
+            <p class="footer-text">Confidential Project - Authorized Personnel Only</p>
+            <div class="footer-badge">🔒 Secure Connection Established</div>
+            <p class="footer-text" style="margin-top: 1rem; font-size: 0.8rem;">
+                Last Updated: <span id="lastUpdate"></span>
+            </p>
         </footer>
 
     </div>
 
-    <!-- Notification Toast -->
-    <div id="toast" class="toast"></div>
+    <script>
+        // ==================== PARTICLES GENERATION ====================
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 30;
 
-    <script src="hoverboard-app.js"></script>
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Update last update time
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('lastUpdate').textContent = formattedDate;
+
+            // Save to localStorage
+            localStorage.setItem('hoverboard_progress', '67');
+            localStorage.setItem('hoverboard_last_visit', now.toISOString());
+
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    document.getElementById('app').style.display = 'block';
+                }, 500);
+            }, 2000);
+        });
+
+        // ==================== SERVICE WORKER ====================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/hoverboard-sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(err => console.log('SW registration failed'));
+            });
+        }
+
+        // ==================== PROGRESS ANIMATION ====================
+        window.addEventListener('load', () => {
+            const progressValue = document.getElementById('progressValue');
+            let currentProgress = 0;
+            const targetProgress = 67;
+            const duration = 2000; // 2 seconds
+            const increment = targetProgress / (duration / 16); // 60fps
+
+            const animateProgress = () => {
+                if (currentProgress < targetProgress) {
+                    currentProgress += increment;
+                    if (currentProgress > targetProgress) {
+                        currentProgress = targetProgress;
+                    }
+                    progressValue.textContent = Math.floor(currentProgress) + '%';
+                    requestAnimationFrame(animateProgress);
+                }
+            };
+
+            setTimeout(animateProgress, 500);
+        });
+    </script>
 </body>
 </html>
